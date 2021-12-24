@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>User Form</title>
+    </head>
+
+    <body>
+
+        <!-- THE FORM -->
+        <form id="addUser" role="form">
+        {% csrf_token %}
+            <div class="form-group", style="margin-bottom: 10px";>
+                <label class="form-control-label">Name:</label>
+                <input class="form-control" type="text" name="name" id="name" maxlength="200" placeholder="eg: John Doe" required="required">
+                <div id="name_err"></div>
+            </div>
+            <div class="form-group", style="margin-bottom: 10px";>
+                <label class="form-control-label">Date of Birth:</label>
+                <input class="form-control" type="date" name="dob" required="required">
+            </div>
+            <div class="form-group", style="margin-bottom: 10px";>
+                <label class="form-control-label">Address:</label>
+                <textarea class="form-control" name="address" placeholder="eg: Address" rows="5" required="required"></textarea>
+            </div>
+            <div class="form-group", style="margin-bottom: 10px";>
+                <label class="form-control-label">Postcode:</label>
+                <input class="form-control" type="text" name="postcode" id="postcode" maxlength="200" placeholder="eg: 50000" required="required">
+                <div id="postcode_err"></div>
+            </div>
+            <div class="form-group", id="state", style="margin-bottom: 10px";></div>
+            <div id="final_msg"></div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+
+        <!-- JS SCRIPTS -->
+        <script src="{% static "jquery/jquery.min.js"%}"></script>
+        <script src="{% static "bootstrap/bootstrap.bundle.min.js"%}"></script>
+
+        <script>
+            $(document).ready(function()
+            {
+                //POSTCODE STATE
+                $('#postcode').change(function()
+                {
+                    let postcode = $("#postcode").val();
+                    let showingStateHTMLData=""
+                    let showingStateErrHTMLData=""
+                    $("#postcode_err").html(showingStateErrHTMLData)
+                    if(postcode==35000 || postcode=="35000")
+                    {
+                        showingStateHTMLData+="<label class='form-control-label'>State:</label>"
+                        showingStateHTMLData+="<input class='form-control' type='text' disabled='disabled' value='Perak'>"
+                        $("#state").html(showingStateHTMLData)
+                    }
+                    else if(postcode==50000 || postcode=="50000")
+                    {
+                        showingStateHTMLData+="<label class='form-control-label'>State:</label>"
+                        showingStateHTMLData+="<input class='form-control' type='text' disabled='disabled' value='Wilayah Persekutuan'>"
+                        $("#state").html(showingStateHTMLData)
+                    }
+                    else if(postcode==80000 || postcode=="80000")
+                    {
+                        showingStateHTMLData+="<label class='form-control-label'>State:</label>"
+                        showingStateHTMLData+="<input class='form-control' type='text' disabled='disabled' value='Johor'>"
+                        $("#state").html(showingStateHTMLData)
+                    }
+                    else if(postcode=="")
+                    {
+                        showingStateErrHTMLData=""
+                        $("#postcode_err").html(showingStateErrHTMLData)
+                    }
+                    else
+                    {
+                        showingStateErrHTMLData="<div>Postcode not in system!!!</div>"
+                        $("#postcode_err").html(showingStateErrHTMLData)
+                    }
+                })
+
+                //NAME
+                $("#name").change(function()
+                {
+                    let name = $("#name").val();
+                    let showingNameErrHTMLData=""
+                    $("#name_err").html(showingNameErrHTMLData)
+                    let check = /^[a-zA-Z ]+$/.test(name);
+                    if(check==false)
+                    {
+                        showingNameErrHTMLData+="<div>Enter correct name!!!</div>"
+                        $("#name_err").html(showingNameErrHTMLData)
+                    }
+                })
+
+                //SAVE
+                $("#addUser").on("submit", function(event)
+                {
+                    event.preventDefault();
+                    let addUserForm = $("#addUser")
+
+                    $.ajax
+                    ({
+                        type: "POST",
+                        url: "{% url 'saveUser' %}",
+                        data: addUserForm.serialize(),
+                        success: function(response)
+                        {
+                            let showingSuccess=""
+                            $("#final_msg").html(showingSuccess)
+                            if(response=="success")
+                            {
+                                showingSuccess+="<div>Saved!!!</div>"
+                                $("#final_msg").html(showingSuccess)
+                            }
+                            else if(response=="failed")
+                            {
+                                showingSuccess+="<div>Failed!!!</div>"
+                                $("#final_msg").html(showingSuccess)
+                            }
+                        },
+                        error: function(response)
+                        {
+                            console.log(response)
+                        }
+                    })
+                })
+
+            })
+        </script>
+    </body>
+</html>
